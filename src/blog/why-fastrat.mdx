@@ -1,0 +1,133 @@
+import logo from '#/images/logo.webp'
+
+<h1 id='modern-fastrat'>Modern Web Development with Fastify + React</h1>
+
+<img
+  src={logo}
+  alt='A rat going fast on their skateboard'
+  className='rounded mx-auto'
+  width={200}
+  height={200}
+/>
+
+Doing modern web development can mean different things, for example you can have a very sophisticated interaction with legacy code, or you might be building a "simple" landing page, but with very modern tooling.
+
+It's nice that we can ask us this question, because web development over the years went very far and it's reaching many different devices.
+If in the past native applications could have an advantage, web applications are more and more shortening the distance, across every platform.
+
+I still find flabbergasting that VSCode can be opened on each GitHub repository by pressing `.` and the editor will persist all the preferences that are in sync.
+
+<h2 id='why-fastrat'>Why FastRat (Fastify + React)</h2>
+
+JavaScript world changes so quickly that often we ask ourselves if we are learning something new, just because it's trendy or if it's something that we truly believe it's an improvement.
+I remember when in the early days of React, everyone was reminding to everyone on Twitter that:
+
+> It is not a framework!
+
+And I think that it was a good thing, because it fostered composition and build many cool projects around it.
+So, with the same spirit, here I am composing React with my favourite backend framework which is Fastify.
+
+Fastify is well maintained, has Node contributors among the maintainers and it is used by many companies in production.
+That's why I consider it a safe bet.
+
+FastRat is not a React metaframework like Next or Remix; it just composes well known library to create a starter kit that can be deployed everywhere Node runs.  
+While there are other interesting runtime environments (Bun, Deno, ...etc), this starter kit intentionally focuses in getting the best out of Node.
+
+<h2 id='spa-or-mpa'>SPA or MPA?</h2>
+
+I want to have both in the same project. Why? 
+ 
+I think that it's a very common case to rely on a SPA for a private dashboard, but we might still need some SSR rendered page if for example we are building an e-commerce and our product pages need to be crawled by Google or any other search engine.
+
+FastRat renders the HTML on the first request and then uses client side routing when the interaction happens on the page.
+
+Also since we have a server running for the API end points, the intention is to re-use such server for doing the first page render.
+
+<h2 id='server-side-data-fetching'>Server side data fetching</h2>
+
+With FastRat you can achieve what in NextJS can be done through <a className='link' href='https://nextjs.org/docs/pages/building-your-application/data-fetching/get-server-side-props' target='_blank'>**getServerSideProps**</a>.  
+We are just leveraging what <a href='https://tanstack.com/router/latest/docs/framework/react/guide/data-loading' target='_blank'>Tanstack Router</a> offers for the purpose, which is the loader function on the route definition.
+
+Check these key points in this sample app's file [src/routes/notes/$noteId.tsx](https://github.com/giacomorebonato/fastrat/blob/main/src/routes/notes/%24noteId.tsx)
+
+* the loader executes on server side when the page is requested directly
+* executes on client side when client side routing happens
+* the condition `if (context.queries)` verifies that we have server queries appended to the context
+* fetched data can be passed to Tanstack Query `initialData` for the first render
+
+Points worth mentioning:
+
+* directives `'use server'` and `'use client'` are not supported, so you have to be mindful about not importing server only code into the client and vice versa
+* we are not supporting [React Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+
+Things might change in the future, but the current solution is reliable and automatically tested on this repository.  
+
+<h2 id='seo'>SEO</h2>
+
+We can then leverage server side data fetching for building pages that need to be crawled by search engines.  
+<a className='link' href='https://github.com/staylor/react-helmet-async' target='_blank'>react-helmet-async</a> can be used to add any metalink/markup to the `<head />` of the page.  
+The markup in the `<head />` will be updated both on SSR and client side routing.
+
+<h2 id='pwa'>PWA</h2>
+
+This starter kit uses [vite-plugin-pwa](https://vite-pwa-org.netlify.app) to provide the experience of an offline first web application.  
+Read more about [Progressive Web Apps](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps).
+
+To generate the assets required for the PWA you have to:
+
+* provide a `./public/logo.svg`
+* execute `node --run generate-pwa-assets`
+
+The assets will be generated in `./public` and they are referenced in `[index.html]('./index.html')`
+
+<h2 id='great-dx'>Great Developer Experience</h2>
+
+When using NextJS I like that with one command I have both my frontend and backend running and that I can share code between the two and import it in the same way.  
+This wouldn't have been possible without [Vite](https://vitejs.dev) and [Vavite](https://github.com/cyco130/vavite).
+
+When you run `pnpm dev` all your code is running and changes to code are applied immediately without restarting the server.  
+This happens because Vavite is using Vite to compile both frontend and backend code.
+
+<h2 id='fully-typed'>Fully typed with TypeScript</h2>
+
+FastRat uses the modern libraries that allow to type every aspect of your apps:
+
+<h3>tRPC</h3>
+
+[tRPC](https://trpc.io) adapter for Fastify is used for E2E type safety for requests from browser to server.  
+End points appears in Tanstack Query intellisense and are type checked.
+
+<h3>Tanstack Router</h3>
+
+[Tanstack Router](https://tanstack.com/router/latest) is used both for server side and client side routing.  
+When using it's link component you'll be guided to the available routes.  
+It's particularly useful when you start to store more data in URL params and query strings.  
+FastRat includes [router-vite-plugin](https://www.npmjs.com/package/@tanstack/router-vite-plugin) for file-based routing, the routes are in `src/routes/`.
+
+<h3>Drizzle ORM</h3>
+
+[Drizzle ORM](https://orm.drizzle.team/) is a tiny layer on top of SQL (lite in this case).  
+It handles schema, migrations and queries.
+
+<h3>Zod</h3>
+
+Everytime that you need to validate an object structure and to infer its type, you can use [Zod](https://github.com/colinhacks/zod).  
+Which is also at the root of the tRPC functionality.
+
+<h2 id='testing'>Testing</h2>
+
+FastRat comes with these commands:
+
+```bash
+node --run test # for testing backend code
+node --run e2e  # for integration and UI testing
+```
+
+They both output coverage.
+You can achieve 100% concurrencies of tests by relying on the fact that when starting a Fastify server, it creates a new in memory sqlite database.
+Both tests command run out of the box in GitHub actions and they report on PR.
+
+### Deployment freedom
+
+This project can run anywhere Docker containers run.  
+This website automatically deploys to [Fly.io](https://fly.io) leveraging their [GitHub action](https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/) that runs when merge into the main branch.

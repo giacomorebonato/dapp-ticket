@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      // https://github.com/TanStack/router/blob/main/packages/start/src/client/Meta.tsx#L123
+      __TSR__ = {
+        matches: [],
+        streamedValues: {},
+        initMatch(index) {
+          Object.entries(__TSR__.matches[index].extracted).forEach(([id, ex]) => {            
+            if (ex.type === 'stream') {
+              let controller;
+              ex.value = new ReadableStream({
+                start(c) { controller = c; }
+              })
+              ex.value.controller = controller
+            } else if (ex.type === 'promise') {
+              let r, j
+              ex.value = new Promise((r_, j_) => { r = r_, j = j_ })
+              ex.resolve = r; ex.reject = j
+            }
+          })
+        },
+        cleanScripts() {
+          document.querySelectorAll('.tsr-once').forEach((el) => {
+            el.remove()
+          })
+        },
+      }
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="/src/browser/main.css" />
+
+    <!-- PWA start -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/logo.svg" sizes="any" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/apple-splash-portrait-light-1536x2048.png">
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/apple-splash-landscape-light-2048x1536.png">
+    <link rel="apple-touch-startup-image" media="screen and (prefers-color-scheme: dark) and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/apple-splash-portrait-dark-1536x2048.png">
+    <link rel="apple-touch-startup-image" media="screen and (prefers-color-scheme: dark) and (device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="/apple-splash-landscape-dark-2048x1536.png">
+    <!-- PWA end -->        
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script defer type="module" src="/src/entry-client.tsx"></script>
+  </body>
+</html>
